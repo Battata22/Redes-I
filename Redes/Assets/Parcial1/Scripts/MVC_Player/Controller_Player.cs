@@ -54,6 +54,11 @@ public class Controller_Player
         {
             _model.Jump();
         }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            _playerScript.InstantiateBullet();
+        }
     }
 
     public void FakeFixedUpdate()

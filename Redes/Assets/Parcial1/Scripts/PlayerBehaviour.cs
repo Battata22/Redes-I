@@ -1,7 +1,5 @@
 using Fusion;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -55,6 +53,10 @@ public class PlayerBehaviour : NetworkBehaviour
     [SerializeField] PlayerTeam _team;
     public PlayerTeam Team { get { return _team; } private set { _team = value; } }
 
+    [SerializeField] BulletBehaviour _bulletPrefab;
+    public BulletBehaviour BulletPrefab { get { return _bulletPrefab; } private set { _bulletPrefab = value; } }
+
+
 
     private void Awake()
     {
@@ -73,8 +75,6 @@ public class PlayerBehaviour : NetworkBehaviour
         _model.FakeUpdate();
         _controller.FakeUpdate();
         _view.FakeUpdate();
-
-
     }
 
     public override void FixedUpdateNetwork()
@@ -122,5 +122,15 @@ public class PlayerBehaviour : NetworkBehaviour
     public void ReduceJump()
     {
         JumpsLeft -= JumpCost;
+    }
+
+    public void InstantiateBullet()
+    {
+
+        var bullet = Instantiate(_bulletPrefab, transform.position, Quaternion.identity);
+        var cursorLocation = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
+        bullet.SetDirection(cursorLocation);
+        bullet.SetOwner(this);
+
     }
 }

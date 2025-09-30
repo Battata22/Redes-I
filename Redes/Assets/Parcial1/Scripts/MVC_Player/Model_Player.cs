@@ -81,5 +81,9 @@ public class Model_Player
         _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
     }
 
+    public void Shoot()
+    {
+        
+    }
 
 }
