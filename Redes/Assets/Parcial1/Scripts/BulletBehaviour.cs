@@ -9,10 +9,14 @@ public class BulletBehaviour : NetworkBehaviour
     [SerializeField] float _speed;
     [SerializeField] PlayerBehaviour _owner;
     Vector3 _dir;
-    
+
+    public override void Spawned()
+    {
+        base.Spawned();
+        StartCoroutine(SelfDestroy(_lifetime));
+    }
     void Start()
     {
-        StartCoroutine(SelfDestroy(_lifetime));
     }
 
     public override void FixedUpdateNetwork()
