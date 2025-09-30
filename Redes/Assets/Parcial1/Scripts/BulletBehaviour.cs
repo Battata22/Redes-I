@@ -5,32 +5,44 @@ using UnityEngine;
 
 public class BulletBehaviour : NetworkBehaviour
 {
+    [SerializeField] float _lifetime;
     [SerializeField] float _speed;
     [SerializeField] PlayerBehaviour _owner;
     Vector3 _dir;
     
     void Start()
     {
-
+        StartCoroutine(SelfDestroy(_lifetime));
     }
 
-    
-    void Update()
+    public override void FixedUpdateNetwork()
     {
         Movement();
     }
 
+    IEnumerator SelfDestroy(float time)
+    {
+        yield return new WaitForSeconds(time);
+        Runner.Despawn(Object);
+    }
+
     void Movement()
     {
-        transform.position += transform.up * _speed * Runner.DeltaTime;
+        transform.position += transform.up * _speed * Runner.DeltaTime;        
     }
 
     public void SetDirection(Vector3 dir)
     {
-        //Quaternion rot = Quaternion.LookRotation(Vector3.up, dir);
-        var rot = dir.z - transform.position.z;
+        ////Quaternion rot = Quaternion.LookRotation(Vector3.up, dir);
+        //var rot = dir.z - transform.position.z;
 
-        transform.eulerAngles = new Vector3(0, 0, rot);
+        //transform.eulerAngles = new Vector3(0, 0, rot);
+
+        var newDir = dir - transform.position;
+
+        newDir.z = 0;
+
+        transform.up = newDir;
     }
 
     public void SetOwner(PlayerBehaviour owner)
@@ -42,12 +54,11 @@ public class BulletBehaviour : NetworkBehaviour
     {
         if (collision.TryGetComponent(out PlayerBehaviour _playerScript) == _owner)
         {
-            print("owner");
+            //print("owner");
         }
-
-        if (collision != null)
+        else
         {
-            //Destroy(gameObject);
+            Runner.Despawn(Object);
         }
 
     }

@@ -127,7 +127,7 @@ public class PlayerBehaviour : NetworkBehaviour
     public void InstantiateBullet()
     {
 
-        var bullet = Instantiate(_bulletPrefab, transform.position, Quaternion.identity);
+        var bullet = Runner.Spawn(_bulletPrefab, transform.position, Quaternion.identity);
         var cursorLocation = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
         bullet.SetDirection(cursorLocation);
         bullet.SetOwner(this);
