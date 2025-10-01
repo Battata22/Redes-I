@@ -1,5 +1,6 @@
 using Fusion;
 using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -131,6 +132,14 @@ public class PlayerBehaviour : NetworkBehaviour
         var cursorLocation = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
         bullet.SetDirection(cursorLocation);
         bullet.SetOwner(this);
+        //Runner.Despawn(bullet.Object);
+        StartCoroutine(SelfDestroy(3, bullet));
 
+    }
+
+    IEnumerator SelfDestroy(float time, BulletBehaviour bullet)
+    {
+        yield return new WaitForSeconds(time);
+        Runner.Despawn(bullet.Object);
     }
 }

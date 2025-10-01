@@ -5,15 +5,13 @@ using UnityEngine;
 
 public class BulletBehaviour : NetworkBehaviour
 {
-    [SerializeField] float _lifetime;
     [SerializeField] float _speed;
     [SerializeField] PlayerBehaviour _owner;
-    Vector3 _dir;
 
     public override void Spawned()
     {
         base.Spawned();
-        StartCoroutine(SelfDestroy(_lifetime));
+        //StartCoroutine(SelfDestroy(3));
     }
     void Start()
     {
@@ -24,11 +22,11 @@ public class BulletBehaviour : NetworkBehaviour
         Movement();
     }
 
-    IEnumerator SelfDestroy(float time)
-    {
-        yield return new WaitForSeconds(time);
-        Runner.Despawn(Object);
-    }
+    //IEnumerator SelfDestroy(float time)
+    //{
+    //    yield return new WaitForSeconds(time);
+    //    Runner.Despawn(Object);
+    //}
 
     void Movement()
     {
@@ -37,11 +35,6 @@ public class BulletBehaviour : NetworkBehaviour
 
     public void SetDirection(Vector3 dir)
     {
-        ////Quaternion rot = Quaternion.LookRotation(Vector3.up, dir);
-        //var rot = dir.z - transform.position.z;
-
-        //transform.eulerAngles = new Vector3(0, 0, rot);
-
         var newDir = dir - transform.position;
 
         newDir.z = 0;
@@ -62,7 +55,7 @@ public class BulletBehaviour : NetworkBehaviour
         }
         else
         {
-            Runner.Despawn(Object);
+            gameObject.SetActive(false);
         }
 
     }

@@ -19,22 +19,36 @@ public class SpawnerManager : SimulationBehaviour, IPlayerJoined
         if (player == Runner.LocalPlayer)
         {
             var _spawned = Runner.Spawn(_playerPrefab, _spawnPoints[CheckForTeam()].position, Quaternion.identity);
+            
             _lastPlayerSpawned = _spawned.GetComponent<PlayerBehaviour>();
             _lastPlayerSpawned.ApplyTeam(_lastPlayerSpawnedTeam, CheckForMaterial());
         }
 
         int CheckForTeam()
         {
-            if (_lastPlayerSpawnedTeam == PlayerTeam.Orange)
+            if (Runner.SessionInfo.PlayerCount % 2 == 1)
             {
+                //Team Blue
                 _lastPlayerSpawnedTeam = PlayerTeam.Blue;
                 return 0;
             }
             else
             {
+                //Team Orange
                 _lastPlayerSpawnedTeam = PlayerTeam.Orange;
                 return 1;
             }
+
+            //if (_lastPlayerSpawnedTeam == PlayerTeam.Orange)
+            //{
+            //    _lastPlayerSpawnedTeam = PlayerTeam.Blue;
+            //    return 0;
+            //}
+            //else
+            //{
+            //    _lastPlayerSpawnedTeam = PlayerTeam.Orange;
+            //    return 1;
+            //}
         }
 
         Color CheckForMaterial()
