@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class Controller_Player
 {
@@ -49,16 +50,20 @@ public class Controller_Player
             _pounding = false;
         }
 
-
-        if (Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.S))
+        if (_playerScript.HasStateAuthority)
         {
-            _model.Jump();
+            if (Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.S))
+            {
+                _model.Jump();
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                _playerScript.InstantiateBullet();
+            }
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            _playerScript.InstantiateBullet();
-        }
+
     }
 
     public void FakeFixedUpdate()

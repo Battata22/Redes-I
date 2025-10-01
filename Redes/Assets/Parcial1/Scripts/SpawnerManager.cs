@@ -11,7 +11,7 @@ public class SpawnerManager : SimulationBehaviour, IPlayerJoined
     [SerializeField] Material _orangeMaterial;
     [SerializeField] Material _blueMaterial;
 
-    [SerializeField] PlayerBehaviour _lastPlayerSpawned;
+    [SerializeField] PlayerBehaviour _playerSpawned;
     [SerializeField] PlayerTeam _lastPlayerSpawnedTeam;
 
     public void PlayerJoined(PlayerRef player)
@@ -20,8 +20,8 @@ public class SpawnerManager : SimulationBehaviour, IPlayerJoined
         {
             var _spawned = Runner.Spawn(_playerPrefab, _spawnPoints[CheckForTeam()].position, Quaternion.identity);
             
-            _lastPlayerSpawned = _spawned.GetComponent<PlayerBehaviour>();
-            _lastPlayerSpawned.ApplyTeam(_lastPlayerSpawnedTeam, CheckForMaterial());
+            _playerSpawned = _spawned.GetComponent<PlayerBehaviour>();
+            _playerSpawned.ApplyTeam(_lastPlayerSpawnedTeam, CheckForMaterial());
         }
 
         int CheckForTeam()
@@ -39,27 +39,17 @@ public class SpawnerManager : SimulationBehaviour, IPlayerJoined
                 return 1;
             }
 
-            //if (_lastPlayerSpawnedTeam == PlayerTeam.Orange)
-            //{
-            //    _lastPlayerSpawnedTeam = PlayerTeam.Blue;
-            //    return 0;
-            //}
-            //else
-            //{
-            //    _lastPlayerSpawnedTeam = PlayerTeam.Orange;
-            //    return 1;
-            //}
         }
 
-        Color CheckForMaterial()
+        Material CheckForMaterial()
         {
             if (_lastPlayerSpawnedTeam == PlayerTeam.Orange)
             {
-                return _orangeMaterial.color;
+                return _orangeMaterial;
             }
             else
             {
-                return _blueMaterial.color;
+                return _blueMaterial;
             }
         }
 

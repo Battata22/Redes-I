@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine;
 
 
-public class PlayerBehaviour : NetworkBehaviour
+public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
 {
     //------------------------MVC-------------------------
     Model_Player _model;
@@ -13,7 +13,9 @@ public class PlayerBehaviour : NetworkBehaviour
 
     //------------------------Life-------------------------
     [SerializeField] int _hp;
-    public int Hp { get { return _hp; } private set { _hp = value; } }
+    [Networked, OnChangedRender(nameof(LifeUpdated))] int Hp { get { return _hp; } /*private*/ set { _hp = value; } }
+
+    public event Action<float> OnLifeUpdate;
 
     [SerializeField] int _maxHp;
     public int MaxHp { get { return _maxHp; } private set { _maxHp = value; } }
@@ -47,8 +49,8 @@ public class PlayerBehaviour : NetworkBehaviour
 
 
     //------------------------MyData-------------------------
-    [SerializeField] Material _matPlayer;
-    public Material MatPlayer { get { return _matPlayer; } private set { _matPlayer = value; } }
+    [SerializeField] SpriteRenderer _spriteRenderer;
+    public SpriteRenderer SpriteRenderer { get { return _spriteRenderer; } private set { _spriteRenderer = value; } }
 
     //------------------------Gameplay-------------------------
     [SerializeField] PlayerTeam _team;
@@ -57,11 +59,41 @@ public class PlayerBehaviour : NetworkBehaviour
     [SerializeField] BulletBehaviour _bulletPrefab;
     public BulletBehaviour BulletPrefab { get { return _bulletPrefab; } private set { _bulletPrefab = value; } }
 
+    [SerializeField] bool _hasJustBeenTp = false;
+    public bool HasJustBeenTp { get { return _hasJustBeenTp; } private set { _hasJustBeenTp = value; } }
+
+    [SerializeField] float _requiredPoundVelocity;
+    public float RequiredPoundVelocity { get { return _requiredPoundVelocity; } private set { _requiredPoundVelocity = value; } }
+
+    [SerializeField] float _poundDamage;
+    public float PoundDamage { get { return _poundDamage; } private set { _poundDamage = value; } }
+
+    float _lastVelocityY;
+
+    bool _canPlay = false;
+
+    public event Action OnDespawn;
 
 
-    private void Awake()
+
+
+    //private void Awake()
+    //{
+    //    SpriteRenderer = GetComponent<SpriteRenderer>();
+    //    Rb = GetComponent<Rigidbody2D>();
+
+    //    _model = new(this);
+    //    _controller = new(this, _model);
+    //    _view = new();
+
+    //    SetMaxVariable();
+    //}
+
+    public override void Spawned()
     {
-        MatPlayer = GetComponent<SpriteRenderer>().material;
+        LifeBarManager.Instance.CreateNewBar(this);
+
+        SpriteRenderer = GetComponent<SpriteRenderer>();
         Rb = GetComponent<Rigidbody2D>();
 
         _model = new(this);
@@ -69,20 +101,41 @@ public class PlayerBehaviour : NetworkBehaviour
         _view = new();
 
         SetMaxVariable();
+
+        GameManager.Instance.AddToUsersList(this);
+        //GameManager.Instance.OnGameStart += PlayerCanStart;
+        GameManager.Instance.OnGameEnded += PlayerCanNotStart;
+    }
+
+    public void PlayerJoined(PlayerRef player)
+    {
+        if (Runner.SessionInfo.PlayerCount >= GameManager.Instance.MinPlayerRequiredToStart)
+        {
+            _canPlay = true;
+        }
     }
 
     private void Update()
     {
-        _model.FakeUpdate();
-        _controller.FakeUpdate();
-        _view.FakeUpdate();
+
+        if (_canPlay)
+        {
+            _model.FakeUpdate();
+            _controller.FakeUpdate();
+            _view.FakeUpdate();
+        }
+
     }
 
     public override void FixedUpdateNetwork()
     {
-        _model.FakeFixedUpdate();
-        _controller.FakeFixedUpdate();
-        _view.FakeFixedUpdate();
+
+        if (_canPlay)
+        {
+            _model.FakeFixedUpdate();
+            _controller.FakeFixedUpdate();
+            _view.FakeFixedUpdate();
+        }
 
     }
 
@@ -96,10 +149,10 @@ public class PlayerBehaviour : NetworkBehaviour
         _controller.FakeOnTriggerExit2D(collision);
     }
 
-    public void ApplyTeam(PlayerTeam team, Color color)
+    public void ApplyTeam(PlayerTeam team, Material mat)
     {
         Team = team;
-        MatPlayer.color = color;
+        SpriteRenderer.material = mat;
 
     }
 
@@ -125,21 +178,87 @@ public class PlayerBehaviour : NetworkBehaviour
         JumpsLeft -= JumpCost;
     }
 
+    public void TPed()
+    {
+        _spriteRenderer.enabled = false;
+        HasJustBeenTp = true;
+    }
+
+    public void TPedOff()
+    {
+        HasJustBeenTp = false;
+        _spriteRenderer.enabled = true;
+    }
+
+    // Source = quien llama al metodo  |  Target = Quien ejecuta el contenido
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_GetDamage(float dmg)
+    {
+        Hp -= (int)dmg;
+        if (Hp <= 0)
+        {
+            Death();
+        }
+    }
+
+    void Death()
+    {
+        GameManager.Instance.PlayerDeath(this);
+        Runner.Despawn(Object);
+    }
+
+    //void PlayerCanStart()
+    //{
+    //    _canPlay = true;
+    //}
+    void PlayerCanNotStart()
+    {
+        _canPlay = false;
+        _rb.velocity = Vector2.zero;
+    }
+
     public void InstantiateBullet()
     {
-
         var bullet = Runner.Spawn(_bulletPrefab, transform.position, Quaternion.identity);
         var cursorLocation = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
         bullet.SetDirection(cursorLocation);
         bullet.SetOwner(this);
         //Runner.Despawn(bullet.Object);
-        StartCoroutine(SelfDestroy(3, bullet));
-
+        StartCoroutine(DestroyBullet(3, bullet));
     }
 
-    IEnumerator SelfDestroy(float time, BulletBehaviour bullet)
+    IEnumerator DestroyBullet(float time, BulletBehaviour bullet)
     {
         yield return new WaitForSeconds(time);
         Runner.Despawn(bullet.Object);
     }
+
+    //[SerializeField] float f;
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.TryGetComponent(out PlayerBehaviour enemy))
+        {
+            if (_lastVelocityY >= RequiredPoundVelocity)
+            {
+                enemy.RPC_GetDamage(PoundDamage);
+                //_rb.AddForce(transform.up * f);
+            }
+            GroundTouched();
+        }
+    }
+
+    void LifeUpdated()
+    {
+        OnLifeUpdate?.Invoke(Hp / (float)_maxHp);
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        base.Despawned(runner, hasState);
+        //GameManager.Instance.OnGameStart -= PlayerCanStart;
+        GameManager.Instance.OnGameEnded -= PlayerCanNotStart;
+        OnDespawn?.Invoke();
+    }
+
+
 }

@@ -92,10 +92,14 @@ MonoBehaviour:
   _jumpCost: 1
   _isGrounded: 0
   _poundForce: 41
-  _matPlayer: {fileID: 0}
+  _spriteRenderer: {fileID: 0}
   _team: 0
   _bulletPrefab: {fileID: 2563219448786698153, guid: b0650c2b4add6e445a28855f18055e2b,
     type: 3}
+  _hasJustBeenTp: 0
+  _requiredPoundVelocity: 15
+  _poundDamage: 25
+  f: 10
 --- !u!114 &-6358218170714603788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,7 +232,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 6526739800689090011}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 3a367662a54e67e4ca7a5506f4678fde, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

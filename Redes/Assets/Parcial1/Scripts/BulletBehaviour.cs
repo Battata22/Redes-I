@@ -1,20 +1,18 @@
 using Fusion;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BulletBehaviour : NetworkBehaviour
 {
     [SerializeField] float _speed;
+    [SerializeField] float _damage;
     [SerializeField] PlayerBehaviour _owner;
+    [SerializeField] Rigidbody2D _rb;
 
     public override void Spawned()
     {
         base.Spawned();
-        //StartCoroutine(SelfDestroy(3));
-    }
-    void Start()
-    {
+
+        //_rb = GetComponent<Rigidbody2D>();
     }
 
     public override void FixedUpdateNetwork()
@@ -22,15 +20,13 @@ public class BulletBehaviour : NetworkBehaviour
         Movement();
     }
 
-    //IEnumerator SelfDestroy(float time)
-    //{
-    //    yield return new WaitForSeconds(time);
-    //    Runner.Despawn(Object);
-    //}
-
     void Movement()
     {
-        transform.position += transform.up * _speed * Runner.DeltaTime;        
+        var dir = transform.up * _speed * Runner.DeltaTime;
+        var newdir = new Vector2(dir.x, dir.y);
+        _rb.position += newdir;
+
+        //transform.position += transform.up * _speed * Runner.DeltaTime;        
     }
 
     public void SetDirection(Vector3 dir)
@@ -49,13 +45,27 @@ public class BulletBehaviour : NetworkBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.TryGetComponent(out PlayerBehaviour _playerScript) == _owner)
+        if (!HasStateAuthority) return;
+
+        if (collision.GetComponent<PlayerBehaviour>())
         {
-            //print("owner");
+            var hit = collision.GetComponent<PlayerBehaviour>();
+
+            if (hit == _owner)
+            {
+                //print("owner");
+            }
+            else
+            {
+                Runner.Despawn(Object);
+                hit.RPC_GetDamage(_damage);
+                print("hit player");
+            }
         }
         else
         {
-            gameObject.SetActive(false);
+            //print("choco con " +  collision.name);
+            Runner.Despawn(Object);
         }
 
     }
