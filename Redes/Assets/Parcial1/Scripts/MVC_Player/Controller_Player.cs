@@ -63,7 +63,7 @@ public class Controller_Player
             }
         }
 
-
+        //_model.FlipX();
     }
 
     public void FakeFixedUpdate()

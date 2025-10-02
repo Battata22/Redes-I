@@ -91,4 +91,16 @@ public class Model_Player
         _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
     }
 
+    public void FlipX()
+    {
+        if (Input.GetKey(KeyCode.A))
+        {
+            _playerScript.SpriteRenderer.flipX = true;
+        }
+        else
+        {
+            _playerScript.SpriteRenderer.flipX = false;
+        }
+    }
+
 }
