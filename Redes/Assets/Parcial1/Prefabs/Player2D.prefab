@@ -46,6 +46,8 @@ GameObject:
   - component: {fileID: 8239563607887985639}
   - component: {fileID: -2254588670153682282}
   - component: {fileID: 3746764308522812119}
+  - component: {fileID: 4195898724076543055}
+  - component: {fileID: -8805645008981684154}
   m_Layer: 0
   m_Name: Player2D
   m_TagString: Untagged
@@ -62,8 +64,8 @@ Transform:
   m_GameObject: {fileID: 6526739800689090011}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.66, y: -3.56, z: -3.7155585}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -4.66, y: -3.56, z: 0}
+  m_LocalScale: {x: 0.17271411, y: 0.17271411, z: 0.17271411}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6824728208784682834}
@@ -91,15 +93,16 @@ MonoBehaviour:
   _jumpsLeft: 0
   _jumpCost: 1
   _isGrounded: 0
+  _isFalling: 0
   _poundForce: 41
   _spriteRenderer: {fileID: 0}
+  _anim: {fileID: 0}
   _team: 0
   _bulletPrefab: {fileID: 2563219448786698153, guid: b0650c2b4add6e445a28855f18055e2b,
     type: 3}
   _hasJustBeenTp: 0
   _requiredPoundVelocity: 15
   _poundDamage: 25
-  f: 10
 --- !u!114 &-6358218170714603788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,6 +145,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 6087701430508994447}
   - {fileID: -6358218170714603788}
+  - {fileID: -8805645008981684154}
   ForceRemoteRenderTimeframe: 0
 --- !u!212 &8239563607887985639
 SpriteRenderer:
@@ -183,7 +187,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -255,7 +259,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.00000023841858, y: -0.50768185}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -266,8 +270,47 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 6.2798963, y: 6.293433}
   m_EdgeRadius: 0
+--- !u!95 &4195898724076543055
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6526739800689090011}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 52361536a8152b047bb333be29fe0834, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-8805645008981684154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6526739800689090011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 506319458, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Animator: {fileID: 4195898724076543055}
+  ApplyTiming: 2
+  SyncSettings: 79
+  StateHashes: 00000000b7ecec0a12a80bb535930a92b1b0dc7d0af95b598eda8db608143596e3d7bd6b6bf3b54480303db9e9974314aa397017
+  TriggerHashes: 00000000af2c8f5ebdb6a8c34bf84a88caff24d3
+  TotalWords: 2
 --- !u!1 &8866755790122054688
 GameObject:
   m_ObjectHideFlags: 0

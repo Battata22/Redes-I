@@ -54,6 +54,8 @@ public class Model_Player
         //    _playerScript.Rb.velocity = new Vector2(_playerScript.Speed * _playerScript.InputDir, _playerScript.Rb.velocity.y); 
         #endregion
 
+        _playerScript.SetCaminandoAnim();
+
         _playerScript.Rb.velocity = new Vector2(_playerScript.InputDirX * _playerScript.Speed, _playerScript.Rb.velocity.y);
 
     }
@@ -61,6 +63,8 @@ public class Model_Player
     public void Jump()
     {
         _playerScript.SetGroundedFalse();
+
+        _playerScript.SetSaltandoAnim();
 
         if (_playerScript.JumpsLeft > 0)
         {
@@ -72,18 +76,19 @@ public class Model_Player
 
     public void Still()
     {
+        if (!_playerScript.Anim.Animator.GetBool("Idle") && !_playerScript.Anim.Animator.GetBool("Cayendo"))
+        {
+            _playerScript.SetIdleAnim();
+        }
         _playerScript.Rb.velocity = new Vector2(0, _playerScript.Rb.velocity.y);
     }
 
     public void Pound()
     {
         if (_playerScript.IsGrounded) return;
-        _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
-    }
 
-    public void Shoot()
-    {
-        
+        _playerScript.SetCayendoAnim();
+        _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
     }
 
 }

@@ -13,7 +13,7 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
 
     //------------------------Life-------------------------
     [SerializeField] int _hp;
-    [Networked, OnChangedRender(nameof(LifeUpdated))] int Hp { get { return _hp; } /*private*/ set { _hp = value; } }
+    [Networked, OnChangedRender(nameof(LifeUpdated))] int Hp { get; set; }
 
     public event Action<float> OnLifeUpdate;
 
@@ -44,6 +44,9 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
     [SerializeField] bool _isGrounded = false;
     public bool IsGrounded { get { return _isGrounded; } private set { _isGrounded = value; } }
 
+    [SerializeField] bool _isFalling = false;
+    public bool IsFalling { get { return _isFalling; } private set { _isFalling = value; } }
+
     [SerializeField] float _poundForce;
     public float PoundForce { get { return _poundForce; } private set { _poundForce = value; } }
 
@@ -51,6 +54,10 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
     //------------------------MyData-------------------------
     [SerializeField] SpriteRenderer _spriteRenderer;
     public SpriteRenderer SpriteRenderer { get { return _spriteRenderer; } private set { _spriteRenderer = value; } }
+
+    [SerializeField] NetworkMecanimAnimator _anim;
+    public NetworkMecanimAnimator Anim { get { return _anim; } private set { _anim = value; } }
+
 
     //------------------------Gameplay-------------------------
     [SerializeField] PlayerTeam _team;
@@ -77,6 +84,8 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
 
 
 
+
+
     //private void Awake()
     //{
     //    SpriteRenderer = GetComponent<SpriteRenderer>();
@@ -93,6 +102,7 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
     {
         LifeBarManager.Instance.CreateNewBar(this);
 
+        Anim = GetComponent<NetworkMecanimAnimator>();
         SpriteRenderer = GetComponent<SpriteRenderer>();
         Rb = GetComponent<Rigidbody2D>();
 
@@ -115,14 +125,40 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
         }
     }
 
+    float waitEscape;
     private void Update()
     {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            waitEscape += Time.deltaTime;
+            if (waitEscape >= 1)
+            {
+                Application.Quit();
+            }
+        }
+        else
+        {
+            waitEscape = 0;
+        }
+
+        _hp = Hp;
 
         if (_canPlay)
         {
             _model.FakeUpdate();
             _controller.FakeUpdate();
             _view.FakeUpdate();
+        }
+
+        Anim.Animator.SetBool("Grounded", _isGrounded);
+        
+
+        _lastVelocityY = Mathf.Abs(_rb.velocity.y);
+
+        if (_rb.velocity.y < 0 && !Anim.Animator.GetBool("Cayendo") && !IsGrounded)
+        {
+            SetAllAnimFalse();
+            SetCayendoAnim();
         }
 
     }
@@ -159,6 +195,7 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
     public void GroundTouched()
     {
         IsGrounded = true;
+        Anim.Animator.SetBool("Cayendo", false);
         JumpsLeft = JumpsMaxAmount;
     }
 
@@ -219,6 +256,8 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
 
     public void InstantiateBullet()
     {
+        SetDisparoAnim();
+
         var bullet = Runner.Spawn(_bulletPrefab, transform.position, Quaternion.identity);
         var cursorLocation = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
         bullet.SetDirection(cursorLocation);
@@ -238,12 +277,14 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
     {
         if (collision.gameObject.TryGetComponent(out PlayerBehaviour enemy))
         {
+
+            GroundTouched();
+
             if (_lastVelocityY >= RequiredPoundVelocity)
             {
                 enemy.RPC_GetDamage(PoundDamage);
                 //_rb.AddForce(transform.up * f);
             }
-            GroundTouched();
         }
     }
 
@@ -251,6 +292,48 @@ public class PlayerBehaviour : NetworkBehaviour, IPlayerJoined
     {
         OnLifeUpdate?.Invoke(Hp / (float)_maxHp);
     }
+
+    #region Animator
+    public void SetAllAnimFalse()
+    {
+        Anim.Animator.SetBool("Idle", false);
+        Anim.Animator.SetBool("Saltando", false);
+        Anim.Animator.SetBool("Cayendo", false);
+        Anim.Animator.SetBool("Caminando", false);
+        Anim.Animator.SetBool("Grounded", false);
+    }
+
+    public void SetIdleAnim()
+    {
+        SetAllAnimFalse();
+        Anim.Animator.SetBool("Idle", true);
+    }
+    public void SetSaltandoAnim()
+    {
+        SetAllAnimFalse();
+        Anim.Animator.SetBool("Saltando", true);
+    }
+    public void SetCayendoAnim()
+    {
+        SetAllAnimFalse();
+        Anim.Animator.SetBool("Cayendo", true);
+    }
+    public void SetCaminandoAnim()
+    {
+        SetAllAnimFalse();
+        Anim.Animator.SetBool("Caminando", true);
+    }
+    public void SetDisparoAnim()
+    {
+        SetAllAnimFalse();
+        Anim.SetTrigger("Disparo");
+    }
+    public void SetAplastadoAnim()
+    {
+        SetAllAnimFalse();
+        Anim.SetTrigger("Aplastado");
+    }
+    #endregion
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
