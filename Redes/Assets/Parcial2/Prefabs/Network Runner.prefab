@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2425093823838399581}
   - component: {fileID: 6795933037067098626}
   - component: {fileID: -5312816221942810628}
+  - component: {fileID: 1338372056946409644}
   m_Layer: 0
   m_Name: Network Runner
   m_TagString: Untagged
@@ -75,10 +76,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerPrefab:
     RawGuidValue: 0fe04ed6634f2ed4099d2f31caa52645
-  _spawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
   _orangeMaterial: {fileID: 2100000, guid: c19ceea7f73017d40a3457c34de289ca, type: 2}
   _blueMaterial: {fileID: 2100000, guid: c7d36b5974550ec48952bb8640c5646e, type: 2}
   _playerSpawned: {fileID: 0}
   _lastPlayerSpawnedTeam: 0
+--- !u!114 &1338372056946409644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962159586581833407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9fd79d79a0fb459ababab9a78f00caa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _physicsAuthority: 2
+  _physicsTiming: 3
+  ClientPhysicsSimulation: 3
+  DeltaTimeMultiplier: 1
+  SetUnityFixedTimestep: 0

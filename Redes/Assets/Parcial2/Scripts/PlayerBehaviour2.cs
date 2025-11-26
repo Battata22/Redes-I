@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 {
+    [SerializeField] Material _orangeMaterial;
+    [SerializeField] Material _blueMaterial;
+
+    [Networked, OnChangedRender(nameof(SelectMaterial))] PlayerTeam SelectedTeam {  get; set; }
+
     //------------------------MVC-------------------------
     Controller_Player2 _controller;
 
@@ -79,8 +84,22 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 
     public event Action OnDespawn;
 
-    BulletPointManager _bulletSpawnPosition;
+    WeaponBehaviour _weaponBehaviour;
 
+    [Networked, OnChangedRender(nameof(AnimStateChanged))]
+    public AnimState CurrentState { get; set; }
+
+
+    void SelectMaterial()
+    {
+        if (SelectedTeam == PlayerTeam.Orange)
+        {
+            SpriteRenderer.material = _orangeMaterial;
+            return;
+        }
+
+        SpriteRenderer.material = _blueMaterial;
+    }
 
     public override void Spawned()
     {
@@ -98,7 +117,9 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 
         GameManager2.Instance.OnGameEnded += PlayerCanNotStart;
 
-        _bulletSpawnPosition = GetComponentInChildren<BulletPointManager>();
+        _weaponBehaviour = GetComponent<WeaponBehaviour>();
+
+        SelectMaterial();
     }
 
     public void PlayerJoined(PlayerRef player)
@@ -125,22 +146,16 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
             waitEscape = 0;
         }
 
-        _hp = Hp;
-
-        if (_canPlay)
-        {
-            _controller.FakeUpdate();
-        }
-
-        Anim.Animator.SetBool("Grounded", _isGrounded);
-        
+        _hp = Hp;      
 
         _lastVelocityY = Mathf.Abs(_rb.velocity.y);
 
-        if (_rb.velocity.y < 0 && !Anim.Animator.GetBool("Cayendo") && !IsGrounded)
+        if (!IsGrounded)
         {
-            SetAllAnimFalse();
-            SetCayendoAnim();
+            if (_rb.velocity.y > 0.1f)
+                SetSaltandoAnim();
+            else if (_rb.velocity.y < -0.1f)
+                SetCayendoAnim();
         }
 
     }
@@ -148,11 +163,67 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     public override void FixedUpdateNetwork()
     {
 
-        if (_canPlay)
+        //if (Object.HasInputAuthority)
+        //{
+        //    UpdateAnimState();
+        //}
+
+        //if (_canPlay)
+        //{
+        //    _controller.FakeFixedUpdate();
+        //}
+
+        if (!_canPlay) return;
+
+        _controller.FakeFixedUpdate();
+
+        if (HasStateAuthority)
         {
-            _controller.FakeFixedUpdate();
+
+            if (GetInput(out NetworkInputData inputs)) { }
+
+
+            float vx = Rb.velocity.x;
+            float vy = Rb.velocity.y;
+
+            if (false)
+            {
+                CurrentState = AnimState.Stomped;
+            }
+            else if (!IsGrounded)
+            {
+                if (vy > 0.1f)
+                    CurrentState = AnimState.Jumping;
+                else if (vy < -0.1f)
+                    CurrentState = AnimState.Falling;
+            }
+            else
+            {
+                if (GetInput(out NetworkInputData netInputs) && Mathf.Abs(netInputs.XAxis) > 0.01f)
+                    CurrentState = AnimState.Walking;
+                else
+                    CurrentState = AnimState.Idle;
+            }
         }
 
+    }
+
+    void UpdateAnimState()
+    {
+        if (!IsGrounded)
+        {
+            if (_rb.velocity.y > 0.1f)
+                CurrentState = AnimState.Jumping;
+            else if (_rb.velocity.y < -0.1f)
+                CurrentState = AnimState.Falling;
+        }
+        else
+        {
+            if (Mathf.Abs(_rb.velocity.x) > 0.1f)
+                CurrentState = AnimState.Walking;
+            else
+                CurrentState = AnimState.Idle;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -167,6 +238,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 
     public void ApplyTeam(PlayerTeam team, Material mat)
     {
+        SelectedTeam = team;
         Team = team;
         SpriteRenderer.material = mat;
     }
@@ -223,7 +295,6 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
         Runner.Despawn(Object);
     }
 
-
     void PlayerCanNotStart()
     {
         _canPlay = false;
@@ -232,22 +303,18 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 
     public void InstantiateBullet(Vector3 DirBullet)
     {
-        SetDisparoAnim();
+        //SetDisparoAnim();
 
-        var bullet = Runner.Spawn(_bulletPrefab, transform.position, Quaternion.identity);
-        //var cursorLocation = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
-        //var cursorLocation = Camera.main.ScreenToWorldPoint(DirBullet);
-        var cursorLocation = _bulletSpawnPosition.transform.position;
-        bullet.SetDirection(cursorLocation);
-        bullet.SetOwner(this);
+        //_weaponBehaviour.ShootBullet(this, DirBullet);
 
-        StartCoroutine(DestroyBullet(3, bullet));
-    }
 
-    IEnumerator DestroyBullet(float time, BulletBehaviour2 bullet)
-    {
-        yield return new WaitForSeconds(time);
-        Runner.Despawn(bullet.Object);
+        if (Runner.LocalPlayer == Object.InputAuthority)
+            Anim.SetTrigger("Disparo");
+
+        if (HasStateAuthority)
+            CurrentState = AnimState.Shooting;
+
+        _weaponBehaviour.ShootBullet(this, DirBullet);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -269,45 +336,95 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
         OnLifeUpdate?.Invoke(Hp / (float)_maxHp);
     }
 
-    #region Animator
-    public void SetAllAnimFalse()
+    void AnimStateChanged()
     {
-        Anim.Animator.SetBool("Idle", false);
-        Anim.Animator.SetBool("Saltando", false);
-        Anim.Animator.SetBool("Cayendo", false);
-        Anim.Animator.SetBool("Caminando", false);
-        Anim.Animator.SetBool("Grounded", false);
+        switch (CurrentState)
+        {
+            case AnimState.Idle: Anim.Animator.SetTrigger("Idle"); break;
+            case AnimState.Walking: Anim.Animator.SetTrigger("Walk"); break;
+            case AnimState.Jumping: Anim.Animator.SetTrigger("Jump"); break;
+            case AnimState.Falling: Anim.Animator.SetTrigger("Fall"); break;
+            case AnimState.Shooting: Anim.Animator.SetTrigger("Shoot"); break;
+            case AnimState.Stomped: Anim.Animator.SetTrigger("Stomped"); break;
+        }
     }
+
+    #region Animator
+    //public void SetAllAnimFalse()
+    //{
+    //    Anim.Animator.SetBool("Idle", false);
+    //    Anim.Animator.SetBool("Saltando", false);
+    //    Anim.Animator.SetBool("Cayendo", false);
+    //    Anim.Animator.SetBool("Caminando", false);
+    //    Anim.Animator.SetBool("Grounded", false);
+    //}
+    //
+    //public void SetIdleAnim()
+    //{
+    //    Anim.Animator.SetBool("Saltando", false);
+    //    Anim.Animator.SetBool("Cayendo", false);
+    //    Anim.Animator.SetBool("Caminando", false);
+    //    Anim.Animator.SetBool("Idle", true);
+    //}
+    //public void SetSaltandoAnim()
+    //{
+    //    Anim.Animator.SetBool("Idle", false);
+    //    Anim.Animator.SetBool("Caminando", false);
+    //    Anim.Animator.SetBool("Cayendo", false);
+    //    Anim.Animator.SetBool("Saltando", true);
+    //}
+    //public void SetCayendoAnim()
+    //{
+    //    Anim.Animator.SetBool("Idle", false);
+    //    Anim.Animator.SetBool("Caminando", false);
+    //    Anim.Animator.SetBool("Cayendo", true);
+    //    Anim.Animator.SetBool("Saltando", false);
+    //}
+    //public void SetCaminandoAnim()
+    //{
+    //    Anim.Animator.SetBool("Idle", false);
+    //    Anim.Animator.SetBool("Caminando", true);
+    //    Anim.Animator.SetBool("Cayendo", false);
+    //    Anim.Animator.SetBool("Saltando", false);
+    //}
+    //public void SetDisparoAnim()
+    //{
+    //    Anim.SetTrigger("Disparo");
+    //}
+    //public void SetAplastadoAnim()
+    //{
+    //    SetAllAnimFalse();
+    //    Anim.SetTrigger("Aplastado");
+    //}
 
     public void SetIdleAnim()
     {
-        SetAllAnimFalse();
-        Anim.Animator.SetBool("Idle", true);
+        Anim.Animator.SetTrigger("Idle");
     }
+
     public void SetSaltandoAnim()
     {
-        SetAllAnimFalse();
-        Anim.Animator.SetBool("Saltando", true);
+        Anim.Animator.SetTrigger("Saltando");
     }
+
     public void SetCayendoAnim()
     {
-        SetAllAnimFalse();
-        Anim.Animator.SetBool("Cayendo", true);
+        Anim.Animator.SetTrigger("Cayendo");
     }
+
     public void SetCaminandoAnim()
     {
-        SetAllAnimFalse();
-        Anim.Animator.SetBool("Caminando", true);
+        Anim.Animator.SetTrigger("Caminando");
     }
+
     public void SetDisparoAnim()
     {
-        SetAllAnimFalse();
-        Anim.SetTrigger("Disparo");
+        Anim.Animator.SetTrigger("Disparo");
     }
+
     public void SetAplastadoAnim()
     {
-        SetAllAnimFalse();
-        Anim.SetTrigger("Aplastado");
+        Anim.Animator.SetTrigger("Aplastado");
     }
     #endregion
 
@@ -320,4 +437,14 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     }
 
 
+}
+
+public enum AnimState
+{
+    Idle,
+    Walking,
+    Jumping,
+    Falling,
+    Shooting,
+    Stomped
 }

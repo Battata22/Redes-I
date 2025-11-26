@@ -11,8 +11,6 @@ public class BulletBehaviour2 : NetworkBehaviour
     public override void Spawned()
     {
         base.Spawned();
-
-        //_rb = GetComponent<Rigidbody2D>();
     }
 
     public override void FixedUpdateNetwork()
@@ -24,9 +22,7 @@ public class BulletBehaviour2 : NetworkBehaviour
     {
         var dir = transform.up * _speed * Runner.DeltaTime;
         var newdir = new Vector2(dir.x, dir.y);
-        _rb.position += newdir;
-
-        //transform.position += transform.up * _speed * Runner.DeltaTime;        
+        _rb.position += newdir;     
     }
 
     public void SetDirection(Vector3 dir)

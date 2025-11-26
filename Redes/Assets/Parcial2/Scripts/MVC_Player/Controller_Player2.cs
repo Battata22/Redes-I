@@ -1,7 +1,6 @@
-using Fusion;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
+using static Unity.Collections.Unicode;
 
 public class Controller_Player2
 {
@@ -13,47 +12,6 @@ public class Controller_Player2
     }
 
     #region Fakes
-    public void FakeUpdate()
-    {
-        #region Old
-        //_playerScript.InputDirX = Input.GetAxisRaw("Horizontal");
-        //_playerScript.InputDirY = Input.GetAxisRaw("Vertical");
-
-        //if (_playerScript.InputDirX != 0)
-        //{
-        //    _moving = true;
-        //}
-        //else
-        //{
-        //    _moving = false;
-        //    _model.Still();
-        //}
-
-        //if (_playerScript.InputDirY < 0)
-        //{
-        //    _pounding = true;
-        //}
-        //else
-        //{
-        //    _pounding = false;
-        //}
-
-        //if (_playerScript.HasStateAuthority)
-        //{
-        //    if (Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.S))
-        //    {
-        //        _model.Jump();
-        //    }
-
-        //    if (Input.GetMouseButtonDown(0))
-        //    {
-        //        _playerScript.InstantiateBullet();
-        //    }
-        //}
-
-        //_model.FlipX(); 
-        #endregion
-    }
 
     public void FakeFixedUpdate()
     {
@@ -78,9 +36,28 @@ public class Controller_Player2
         if (inputs.Buttons.IsSet(ButtonTypes.MouseButton0))
         {
             _playerScript.InstantiateBullet(inputs.MousePosition);
+            _playerScript.SetDisparoAnim();
         }
 
-        FlipX(); 
+
+        if (inputs.XAxis < 0)
+        {
+            _playerScript.SpriteRenderer.flipX = true;
+        }
+        else if (inputs.XAxis > 0)
+        {
+            _playerScript.SpriteRenderer.flipX = false;
+        }
+
+        //FlipX();
+
+        if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
+        {
+            if (Mathf.Abs(inputs.XAxis) > 0.01f)
+                _playerScript.Anim.SetTrigger("WalkLocal");
+            else
+                _playerScript.Anim.SetTrigger("IdleLocal");
+        }
 
     }
 
@@ -101,18 +78,41 @@ public class Controller_Player2
     }
     #endregion
 
+    //public void Movement(float inputX)
+    //{
+    //    if (Mathf.Abs(inputX) > 0.01f)
+    //    {
+    //        _playerScript.CurrentState = AnimState.Walking;
+    //        //_playerScript.SetCaminandoAnim();
+    //    }
+    //    else
+    //    {
+    //        _playerScript.CurrentState = AnimState.Idle;
+    //        //_playerScript.SetIdleAnim();
+    //    }
+
+    //    _playerScript.Rb.velocity = new Vector2(inputX * _playerScript.Speed, _playerScript.Rb.velocity.y);           
+
+    //}
+
     public void Movement(float inputX)
     {
-        _playerScript.SetCaminandoAnim();
-
         _playerScript.Rb.velocity = new Vector2(inputX * _playerScript.Speed, _playerScript.Rb.velocity.y);
+
+        if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
+        {
+            if (Mathf.Abs(inputX) > 0.01f)
+                _playerScript.Anim.SetTrigger("WalkLocal");
+            else
+                _playerScript.Anim.SetTrigger("IdleLocal");
+        }
     }
 
     public void Jump()
     {
-        _playerScript.SetGroundedFalse();
+        //_playerScript.SetGroundedFalse();
 
-        _playerScript.SetSaltandoAnim();
+        //_playerScript.SetSaltandoAnim();
 
         if (_playerScript.JumpsLeft > 0)
         {
@@ -126,7 +126,7 @@ public class Controller_Player2
     {
         if (!_playerScript.Anim.Animator.GetBool("Idle") && !_playerScript.Anim.Animator.GetBool("Cayendo"))
         {
-            _playerScript.SetIdleAnim();
+            //_playerScript.SetIdleAnim();
         }
         _playerScript.Rb.velocity = new Vector2(0, _playerScript.Rb.velocity.y);
     }
@@ -135,19 +135,14 @@ public class Controller_Player2
     {
         if (_playerScript.IsGrounded) return;
 
-        _playerScript.SetCayendoAnim();
+        //_playerScript.SetCayendoAnim();
         _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
     }
 
     public void FlipX()
     {
-        if (Input.GetKey(KeyCode.A))
-        {
-            _playerScript.SpriteRenderer.flipX = true;
-        }
-        else
-        {
-            _playerScript.SpriteRenderer.flipX = false;
-        }
+        //_playerScript.SpriteRenderer.flipX = true;
+
+
     }
 }

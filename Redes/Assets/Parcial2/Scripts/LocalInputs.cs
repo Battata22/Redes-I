@@ -48,7 +48,10 @@ public class LocalInputs : NetworkBehaviour
     {
         _inputData.XAxis = Input.GetAxis("Horizontal");
         _inputData.YAxis = Input.GetAxis("Vertical");
-        _inputData.MousePosition = Input.mousePosition;
+
+        Vector3 mouse = Input.mousePosition;
+        mouse.z = 0;
+        _inputData.MousePosition = Camera.main.ScreenToWorldPoint(mouse);
 
         _inputData.Buttons.Set(ButtonTypes.MouseButton0, _isFirePressed);
         _isFirePressed = false;

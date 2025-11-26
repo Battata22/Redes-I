@@ -16,6 +16,8 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
 
     public event Action OnGameEnded;
 
+    [SerializeField] CloseMeManager _closeMeManager;
+
     #region Singleton
     public static GameManager2 Instance { get; private set; }
 
@@ -27,7 +29,7 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
 
     public void AddToUsersList(PlayerBehaviour2 player)
     {
-        var newClient = player.Object.StateAuthority;
+        var newClient = player.Object.InputAuthority;
 
         if (_conectedUsers.Contains(newClient)) return;
 
@@ -41,34 +43,40 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
 
     public void PlayerDeath(PlayerBehaviour2 player)
     {
-        OnGameEnded();
-
-        _defeatImage.enabled = true;
-
-        RPC_PlayerDefeated(player.Object.StateAuthority);
+        RPC_PlayerDefeated(player.Object.InputAuthority);
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
-    void RPC_PlayerDefeated(PlayerRef clientToRemove)
+    void RPC_PlayerDefeated(PlayerRef losingPlayer)
     {
-        RemoveFromoUsersList(clientToRemove);
-
-        if (_conectedUsers.Count == 1 && HasStateAuthority)
+        if (Runner.LocalPlayer == losingPlayer)
         {
-            RPC_Win(_conectedUsers[0]);
+            _defeatImage.enabled = true;
+            OnGameEnded();
+            StartCoroutine(_closeMeManager.GoToLobby(Runner));
+        }
+
+        RemoveFromoUsersList(losingPlayer);
+
+        if (_conectedUsers.Count == 1)
+        {
+            var winner = _conectedUsers[0];
+            RPC_Win(winner);
         }
     }
 
     [Rpc]
     void RPC_Win([RpcTarget] PlayerRef _clientTarget)
     {
-        OnGameEnded();
-
         _winImage.enabled = true;
+        OnGameEnded();
+        StartCoroutine(_closeMeManager.GoToLobby(Runner));
     }
 
     public void PlayerJoined(PlayerRef player)
     {
 
     }
+
+
 }

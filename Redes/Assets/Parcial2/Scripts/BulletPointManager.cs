@@ -5,15 +5,15 @@ using UnityEngine;
 
 public class BulletPointManager : NetworkBehaviour
 {
+
+    private void Start()
+    {
+        if (!Object.HasInputAuthority) Destroy(gameObject);
+    }
+
     private void Update()
     {
-        if (Object.HasInputAuthority)
-        {
-            transform.position = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
-            return;
-        }
-
-        enabled = false;
+        transform.position = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z));
     }
 
 }

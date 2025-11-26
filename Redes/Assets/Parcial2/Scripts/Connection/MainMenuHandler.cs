@@ -19,6 +19,7 @@ public class MainMenuHandler : MonoBehaviour
     [SerializeField] Button _joinButton;
     [SerializeField] Button _goToHostPanelButton;
     [SerializeField] Button _hostButton;
+    [SerializeField] Button _volverHostButton;
 
     [Header("Input Fields")]
     [SerializeField] TMP_InputField _sessionNameField;
@@ -32,6 +33,12 @@ public class MainMenuHandler : MonoBehaviour
         {
             _sessionBrowserPanel.SetActive(false);
             _hostPanel.SetActive(true);
+        });
+
+        _volverHostButton.onClick.AddListener(() =>
+        {
+            _sessionBrowserPanel.SetActive(true);
+            _hostPanel.SetActive(false);
         });
 
         _hostButton.onClick.AddListener(StartGameAsHost);
