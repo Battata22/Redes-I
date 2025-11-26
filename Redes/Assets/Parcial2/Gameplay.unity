@@ -1119,7 +1119,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _winImage: {fileID: 2113135652}
   _defeatImage: {fileID: 404937318}
-  MinPlayerRequiredToStart: 1
+  MinPlayerRequiredToStart: 2
   _closeMeManager: {fileID: 134634275}
 --- !u!1 &696242005
 GameObject:
