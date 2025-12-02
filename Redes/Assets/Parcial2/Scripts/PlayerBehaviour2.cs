@@ -80,7 +80,8 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 
     float _lastVelocityY;
 
-    bool _canPlay = false;
+    [Networked]
+    public NetworkBool CanPlay { get; set; }
 
     public event Action OnDespawn;
 
@@ -89,6 +90,21 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     [Networked, OnChangedRender(nameof(AnimStateChanged))]
     public AnimState CurrentState { get; set; }
 
+    [Networked]
+    public NetworkBool IsReady { get; set; }
+
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPCSetBoolReady(bool mode)
+    {
+        IsReady = mode;
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPCSetCanPlay(bool value)
+    {
+        CanPlay = value;
+    }
 
     void SelectMaterial()
     {
@@ -120,19 +136,32 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
         _weaponBehaviour = GetComponent<WeaponBehaviour>();
 
         SelectMaterial();
+
+        if (HasInputAuthority)
+        {
+            var set = FindObjectOfType<ReadyOrNotScript>();
+            if (set != null)
+            {
+                set.SetMyPlayer(this);
+            }
+        }
+
+        LobbyManager.instance.JointTheList(this);
     }
 
     public void PlayerJoined(PlayerRef player)
     {
-        if (Runner.SessionInfo.PlayerCount >= GameManager2.Instance.MinPlayerRequiredToStart)
-        {
-            _canPlay = true;
-        }
+        //if (Runner.SessionInfo.PlayerCount >= GameManager2.Instance.MinPlayerRequiredToStart)
+        //{
+        //    _canPlay = true;
+        //}
     }
 
     float waitEscape;
     private void Update()
     {
+
+
         if (Input.GetKey(KeyCode.Escape))
         {
             waitEscape += Time.deltaTime;
@@ -163,17 +192,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     public override void FixedUpdateNetwork()
     {
 
-        //if (Object.HasInputAuthority)
-        //{
-        //    UpdateAnimState();
-        //}
-
-        //if (_canPlay)
-        //{
-        //    _controller.FakeFixedUpdate();
-        //}
-
-        if (!_canPlay) return;
+        if (!CanPlay) return;
 
         _controller.FakeFixedUpdate();
 
@@ -297,7 +316,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
 
     void PlayerCanNotStart()
     {
-        _canPlay = false;
+        CanPlay = false;
         _rb.velocity = Vector2.zero;
     }
 

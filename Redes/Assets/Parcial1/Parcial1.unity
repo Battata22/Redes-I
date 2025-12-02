@@ -590,22 +590,62 @@ PrefabInstance:
     - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
         type: 3}
       propertyPath: TotalWords
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
         type: 3}
       propertyPath: TriggerHashes.Array.size
-      value: 5
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
         type: 3}
-      propertyPath: TriggerHashes.Array.data[3]
+      propertyPath: TriggerHashes.Array.data[1]
+      value: -752549942
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[2]
       value: -2008352693
       objectReference: {fileID: 0}
     - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
         type: 3}
+      propertyPath: TriggerHashes.Array.data[3]
+      value: 2081823275
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
       propertyPath: TriggerHashes.Array.data[4]
-      value: -752549942
+      value: -478112268
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[5]
+      value: -43957995
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[6]
+      value: 1586441391
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[7]
+      value: -1012353347
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[8]
+      value: 1305009578
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[9]
+      value: -1117711973
+      objectReference: {fileID: 0}
+    - target: {fileID: -8805645008981684154, guid: 8597728954e2ebe46a2dbe428e955a9f,
+        type: 3}
+      propertyPath: TriggerHashes.Array.data[10]
+      value: 849167529
       objectReference: {fileID: 0}
     - target: {fileID: 3257258061935158840, guid: 8597728954e2ebe46a2dbe428e955a9f,
         type: 3}
@@ -3613,7 +3653,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0

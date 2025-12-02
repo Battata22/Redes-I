@@ -8,6 +8,9 @@ public class WeaponBehaviour : NetworkBehaviour
 
     [SerializeField] NetworkPrefabRef _bulletPrefab;
 
+    [SerializeField] AudioSource _audioSource;
+    [SerializeField] AudioClip _fireSound;
+
     public void ShootBullet(PlayerBehaviour2 _player, Vector3 dir)
     {
         if (!HasStateAuthority) return;
@@ -19,6 +22,8 @@ public class WeaponBehaviour : NetworkBehaviour
         bulletScript.SetDirection(dir);
         bulletScript.SetOwner(_player);
 
+        RPC_PlayShootSound();
+
         StartCoroutine(DestroyBullet(3, bulletScript));
     }
 
@@ -26,6 +31,12 @@ public class WeaponBehaviour : NetworkBehaviour
     {
         yield return new WaitForSeconds(time);
         Runner.Despawn(bullet.Object);
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    void RPC_PlayShootSound()
+    {
+        _audioSource.PlayOneShot(_fireSound);
     }
 
 }

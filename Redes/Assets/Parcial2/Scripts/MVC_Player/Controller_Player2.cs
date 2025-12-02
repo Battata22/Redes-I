@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.Windows;
-using static Unity.Collections.Unicode;
 
 public class Controller_Player2
 {
@@ -49,8 +47,6 @@ public class Controller_Player2
             _playerScript.SpriteRenderer.flipX = false;
         }
 
-        //FlipX();
-
         if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
         {
             if (Mathf.Abs(inputs.XAxis) > 0.01f)
@@ -77,23 +73,6 @@ public class Controller_Player2
         }
     }
     #endregion
-
-    //public void Movement(float inputX)
-    //{
-    //    if (Mathf.Abs(inputX) > 0.01f)
-    //    {
-    //        _playerScript.CurrentState = AnimState.Walking;
-    //        //_playerScript.SetCaminandoAnim();
-    //    }
-    //    else
-    //    {
-    //        _playerScript.CurrentState = AnimState.Idle;
-    //        //_playerScript.SetIdleAnim();
-    //    }
-
-    //    _playerScript.Rb.velocity = new Vector2(inputX * _playerScript.Speed, _playerScript.Rb.velocity.y);           
-
-    //}
 
     public void Movement(float inputX)
     {
@@ -139,10 +118,4 @@ public class Controller_Player2
         _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
     }
 
-    public void FlipX()
-    {
-        //_playerScript.SpriteRenderer.flipX = true;
-
-
-    }
 }

@@ -11,10 +11,15 @@ public class CursorManager2 : MonoBehaviour
 
     void Start()
     {
+        //TurnOffCursor();
+        //TurnOnCrosshair();
+    }
+
+    public void BothOn()
+    {
         TurnOffCursor();
         TurnOnCrosshair();
     }
-
 
     void Update()
     {

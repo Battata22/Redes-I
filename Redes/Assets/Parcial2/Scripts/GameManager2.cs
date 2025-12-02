@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameManager2 : NetworkBehaviour, IPlayerJoined
+public class GameManager2 : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 {
 
     List<PlayerRef> _conectedUsers = new();
@@ -17,6 +17,12 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
     public event Action OnGameEnded;
 
     [SerializeField] CloseMeManager _closeMeManager;
+
+    bool _hasMaxPlayers = false;
+
+    [SerializeField] AudioSource _audioSource;
+    [SerializeField] AudioClip _winSound;
+    [SerializeField] AudioClip _loseSound;
 
     #region Singleton
     public static GameManager2 Instance { get; private set; }
@@ -34,6 +40,11 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
         if (_conectedUsers.Contains(newClient)) return;
 
         _conectedUsers.Add(newClient);
+
+        if (_conectedUsers.Count >= MinPlayerRequiredToStart)
+        {
+            _hasMaxPlayers = true;
+        }
     }
 
     void RemoveFromoUsersList(PlayerRef client)
@@ -52,6 +63,9 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
         if (Runner.LocalPlayer == losingPlayer)
         {
             _defeatImage.enabled = true;
+
+            _audioSource.PlayOneShot(_loseSound);
+
             OnGameEnded();
             StartCoroutine(_closeMeManager.GoToLobby(Runner));
         }
@@ -69,6 +83,9 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
     void RPC_Win([RpcTarget] PlayerRef _clientTarget)
     {
         _winImage.enabled = true;
+
+        _audioSource.PlayOneShot(_winSound);
+
         OnGameEnded();
         StartCoroutine(_closeMeManager.GoToLobby(Runner));
     }
@@ -78,5 +95,12 @@ public class GameManager2 : NetworkBehaviour, IPlayerJoined
 
     }
 
-
+    public void PlayerLeft(PlayerRef player)
+    {
+        if (_hasMaxPlayers)
+        {
+            OnGameEnded();
+            StartCoroutine(_closeMeManager.GoToLobby(Runner));
+        }
+    }
 }
