@@ -188,6 +188,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
         //    else if (_rb.velocity.y < -0.1f)
         //        SetCayendoAnim();
         //}
+        Anim.Animator.SetBool("Grounded", _isGrounded);
 
     }
 
@@ -415,8 +416,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     {
         SetAllAnimFalse();
         //Anim.SetTrigger("Disparo");
-        Anim.Animator.SetTrigger("Disparo");
-        print("asdas" + gameObject.name + transform.position);
+        Anim.SetTrigger("Disparo");
     }
     public void SetAplastadoAnim()
     {
