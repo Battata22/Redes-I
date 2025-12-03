@@ -34,7 +34,7 @@ public class Controller_Player2
         if (inputs.Buttons.IsSet(ButtonTypes.MouseButton0))
         {
             _playerScript.InstantiateBullet(inputs.MousePosition);
-            _playerScript.SetDisparoAnim();
+            //_playerScript.SetDisparoAnim();
         }
 
 
@@ -47,13 +47,13 @@ public class Controller_Player2
             _playerScript.SpriteRenderer.flipX = false;
         }
 
-        if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
-        {
-            if (Mathf.Abs(inputs.XAxis) > 0.01f)
-                _playerScript.Anim.SetTrigger("WalkLocal");
-            else
-                _playerScript.Anim.SetTrigger("IdleLocal");
-        }
+        //if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
+        //{
+        //    if (Mathf.Abs(inputs.XAxis) > 0.01f)
+        //        _playerScript.Anim.SetTrigger("WalkLocal");
+        //    else
+        //        _playerScript.Anim.SetTrigger("IdleLocal");
+        //}
 
     }
 
@@ -78,20 +78,20 @@ public class Controller_Player2
     {
         _playerScript.Rb.velocity = new Vector2(inputX * _playerScript.Speed, _playerScript.Rb.velocity.y);
 
-        if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
-        {
-            if (Mathf.Abs(inputX) > 0.01f)
-                _playerScript.Anim.SetTrigger("WalkLocal");
-            else
-                _playerScript.Anim.SetTrigger("IdleLocal");
-        }
+        //if (_playerScript.Runner.LocalPlayer == _playerScript.Object.InputAuthority)
+        //{
+        //    if (Mathf.Abs(inputX) > 0.01f)
+        //        _playerScript.Anim.SetTrigger("WalkLocal");
+        //    else
+        //        _playerScript.Anim.SetTrigger("IdleLocal");
+        //}
     }
 
     public void Jump()
     {
-        //_playerScript.SetGroundedFalse();
+        _playerScript.SetGroundedFalse();
 
-        //_playerScript.SetSaltandoAnim();
+        _playerScript.SetSaltandoAnim();
 
         if (_playerScript.JumpsLeft > 0)
         {
@@ -107,7 +107,7 @@ public class Controller_Player2
     {
         if (!_playerScript.Anim.Animator.GetBool("Idle") && !_playerScript.Anim.Animator.GetBool("Cayendo"))
         {
-            //_playerScript.SetIdleAnim();
+            _playerScript.SetIdleAnim();
         }
         _playerScript.Rb.velocity = new Vector2(0, _playerScript.Rb.velocity.y);
     }
@@ -116,7 +116,7 @@ public class Controller_Player2
     {
         if (_playerScript.IsGrounded) return;
 
-        //_playerScript.SetCayendoAnim();
+        _playerScript.SetCayendoAnim();
         _playerScript.Rb.velocity += (-Vector2.up * _playerScript.PoundForce * _playerScript.Runner.DeltaTime);
     }
 
