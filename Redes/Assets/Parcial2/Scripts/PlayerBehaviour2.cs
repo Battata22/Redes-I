@@ -1,6 +1,5 @@
 using Fusion;
 using System;
-using System.Collections;
 using UnityEngine;
 
 
@@ -9,7 +8,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     [SerializeField] Material _orangeMaterial;
     [SerializeField] Material _blueMaterial;
 
-    [Networked, OnChangedRender(nameof(SelectMaterial))] PlayerTeam SelectedTeam {  get; set; }
+    [Networked, OnChangedRender(nameof(SelectMaterial))] PlayerTeam SelectedTeam { get; set; }
 
     //------------------------MVC-------------------------
     Controller_Player2 _controller;
@@ -93,6 +92,9 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     [Networked]
     public NetworkBool IsReady { get; set; }
 
+    public AudioSource _audioSourceJump, _audioSourceDano, _audioSourcePound;
+    public AudioClip _audioClipJump, _audioClipDano, _audioClipPound;
+
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void RPCSetBoolReady(bool mode)
@@ -175,7 +177,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
             waitEscape = 0;
         }
 
-        _hp = Hp;      
+        _hp = Hp;
 
         _lastVelocityY = Mathf.Abs(_rb.velocity.y);
 
@@ -302,6 +304,8 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
     public void RPC_GetDamage(float dmg)
     {
         Hp -= (int)dmg;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------
+            _audioSourceDano.PlayOneShot(_audioClipDano);
         if (Hp <= 0)
         {
             Death();
@@ -346,6 +350,7 @@ public class PlayerBehaviour2 : NetworkBehaviour, IPlayerJoined
             if (_lastVelocityY >= RequiredPoundVelocity)
             {
                 enemy.RPC_GetDamage(PoundDamage);
+                _audioSourcePound.PlayOneShot(_audioClipPound);
             }
         }
     }

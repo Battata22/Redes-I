@@ -98,6 +98,8 @@ public class Controller_Player2
             _playerScript.ReduceJump();
             _playerScript.Rb.velocity = new Vector2(_playerScript.Rb.velocity.x, 0);
             _playerScript.Rb.velocity += (Vector2.up * _playerScript.JumpForce);
+            //----------------------------------------------------------------------------------------------------------------------------------
+            _playerScript._audioSourceJump.PlayOneShot(_playerScript._audioClipJump);
         }
     }
 
